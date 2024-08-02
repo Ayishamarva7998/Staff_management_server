@@ -1,26 +1,25 @@
-
 "use strict";
-import express from "express";
-import { config } from "dotenv";
-import mongoose from "mongoose";
-config()
-const app = express();
-const port = process.env.Port
+import express from 'express';
+import { config } from 'dotenv';
+import connectDB from './config/db.js';
+import adminRoutes from './routes/adminRoutes.js';
+import { errorHandler } from './middleware/errorMiddleware.js';
 
 
-const db = process.env.db
-mongoose.connect(db)
-.then(() => console.log("DB connected"))
-.catch(error => console.log(error));
+config();
 
+const app=express();
 
-// Sample route
-app.get('/', (req, res) => {
-    res.send('Hello Worsssld!');
-  });
-  
-  
+app.use(express.json());
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+connectDB();
+
+app.use('/api/admin',adminRoutes);
+
+app.use(errorHandler);
+
+const port = process.env.PORT || 5000;
+
+app.listen(port,()=>{
+console.log(`Server is running on http://localhost:${port}`);
 });
