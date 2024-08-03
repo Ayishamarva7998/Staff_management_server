@@ -4,8 +4,9 @@ import { trycatch } from '../middleware/trycatch.js';
 import { createAdmin,updatePassword } from '../controllers/adminControllers.js';
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/adminValidation.js';
-import { deleteMentor, staffsadd, viewAdvisor, viewMentor } from '../controllers/staffControllers.js';
+import { deleteMentor, searchStaff, staffsadd, viewMentor, viewReviewer } from '../controllers/staffControllers.js';
 import staffValidationSchema from '../validation/staffValidation.js';
+import { payment } from '../controllers/paymentControllers.js';
 
 const router=express.Router();
 
@@ -15,11 +16,15 @@ router.put('/:adminid',trycatch(updatePassword));
 router.post('/staff', validate(staffValidationSchema),trycatch(staffsadd));
 // show mentor and advisor
 router.get('/mentor',trycatch(viewMentor));
-router.get('/advisor',trycatch(viewAdvisor));
+router.get('/reviewer',trycatch(viewReviewer));
 
 
 // delete  mentor and advisor
 
 router.delete('/advisor/:mentorid',trycatch(deleteMentor));
-// admin side search for 
+// admin side search  box
+router.get('/search', trycatch(searchStaff));
+
+//payment for reviewer
+router.post("/payment/:id",payment)
 export default router;

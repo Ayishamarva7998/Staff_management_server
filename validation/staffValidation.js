@@ -8,6 +8,8 @@ const staffValidationSchema = Joi.object({
   calendarId: Joi.string(),
   position: Joi.string().required(),
   stack: Joi.string().optional(),
+  hire: Joi.string().optional(),
+  batch: Joi.string().optional(),
   profileImg: Joi.string().optional(),
   programs: Joi.array().items(
     Joi.object({

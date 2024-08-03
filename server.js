@@ -4,14 +4,14 @@ import { config } from 'dotenv';
 import connectDB from './config/db.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
-
+import cors from 'cors';
 
 config();
 
 const app=express();
 
 app.use(express.json());
-
+app.use(cors());
 
 app.use('/api/admin',adminRoutes);
 
