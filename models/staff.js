@@ -35,6 +35,7 @@ const StaffSchema = new mongoose.Schema({
     },
     details: {
       type: String,
+
     },
   }],
   notification: {
@@ -60,12 +61,12 @@ const StaffSchema = new mongoose.Schema({
 });
 
 // Define the Advisor schema extending the base schema
-const MentorSchema = new mongoose.Schema({
+const AdvisorSchema = new mongoose.Schema({
   batch:  { type: String  // Adjust this to the type you need for batches
 }
 });
 
-// Define the Mentor schema extending the base schema
+// Define the Advisor schema extending the base schema
 const ReviewerSchema = new mongoose.Schema({
   stack: {
     type: String,
@@ -88,6 +89,7 @@ const Staff = mongoose.model('Staff', StaffSchema);
 
 // Create discriminators
 const Reviewer = Staff.discriminator('Reviewer', ReviewerSchema);
-const Mentor = Staff.discriminator('Mentor', MentorSchema);
+const Advisor = Staff.discriminator('Advisor', AdvisorSchema);
 
-export { Staff, Reviewer, Mentor };
+export { Staff, Reviewer, Advisor };
+

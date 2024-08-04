@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcrypt';
-import { Staff, Reviewer, Mentor } from '../models/staff.js';
+import { Staff, Reviewer,Advisor } from '../models/staff.js';
 
 // Configure the email transporter
 const transporter = nodemailer.createTransport({
@@ -14,8 +14,8 @@ export const staffsadd = async (req, res) => {
     const { email, name, phone, role, stack, batch, password ,hire,count} = req.body;
 
     // Ensure role is valid
-    if (!role || !['reviewer', 'mentor'].includes(role)) {
-        return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'mentor'." });
+    if (!role || !['reviewer', 'advisor'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'Advisor'." });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -41,8 +41,8 @@ export const staffsadd = async (req, res) => {
             hire,
             count
         });
-    } else if (role === 'mentor') {
-        staff = new Mentor({
+    } else if (role === 'advisor') {
+        staff = new Advisor({
             name,
             phone,
             email,
@@ -79,18 +79,18 @@ export const staffsadd = async (req, res) => {
 
 
 
-// Show mentors in admin side
-export const viewMentor = async (req, res) => {
+// Show Advisor in admin side
+export const viewAdvisor = async (req, res) => {
   try {
-    const mentors = await Mentor.find();
+    const advisors = await Advisor.find();
 
-    if (mentors.length === 0) {
-      return res.status(404).json({ message: 'No mentors found' });
+    if (advisors.length === 0) {
+      return res.status(404).json({ message: 'No advisors found' });
     }
 
-    res.status(200).json(mentors);
+    res.status(200).json(advisors);
   } catch (error) {
-    res.status(500).json({ message: "Error retrieving mentors", error });
+    res.status(500).json({ message: "Error retrieving advisors", error });
   }
 };
 
@@ -109,20 +109,20 @@ export const viewReviewer = async (req, res) => {
   }
 };
 
-// Delete mentor in admin side
-export const deleteMentor = async (req, res) => {
-  const { mentorId } = req.params;
+// Delete Advisor in admin side
+export const deleteAdvisor = async (req, res) => {
+  const { advisorId } = req.params;
 
   try {
-    const deletedMentor = await Mentor.findByIdAndDelete(mentorId);
+    const deletedAdvisor = await Advisor.findByIdAndDelete(advisorId);
 
-    if (!deletedMentor) {
-      return res.status(404).json({ message: "Mentor not found" });
+    if (!deletedAdvisor) {
+      return res.status(404).json({ message: "Advisor not found" });
     }
 
-    res.status(200).json({ message: "Mentor deleted successfully" });
+    res.status(200).json({ message: "Advisor deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error deleting mentor", error });
+    res.status(500).json({ message: "Error deleting advisor", error });
   }
 };
 
@@ -171,13 +171,13 @@ export const updatestaff = async (req, res) => {
       if (name) staff.name = name;
       if (phone) staff.phone = phone;
       if (role) {
-          if (!['reviewer', 'mentor'].includes(role)) {
-              return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'mentor'." });
+          if (!['reviewer', 'advisor'].includes(role)) {
+              return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'advisor'." });
           }
           staff.role = role;
       }
       if (stack && role === 'reviewer') staff.stack = stack;
-      if (batch && role === 'mentor') staff.batch = batch;
+      if (batch && role === 'advisor') staff.batch = batch;
       if (password) {
           const salt = await bcrypt.genSalt(10);
           staff.password = await bcrypt.hash(password, salt);

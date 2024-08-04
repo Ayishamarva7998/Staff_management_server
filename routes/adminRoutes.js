@@ -4,7 +4,7 @@ import { trycatch } from '../middleware/trycatch.js';
 import { createAdmin,updatePassword } from '../controllers/adminControllers.js';
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/adminValidation.js';
-import { deleteMentor, searchStaff, staffsadd, updatestaff, viewMentor, viewReviewer } from '../controllers/staffControllers.js';
+import { deleteAdvisor, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staffControllers.js';
 import staffValidationSchema from '../validation/staffValidation.js';
 import { payment } from '../controllers/paymentControllers.js';
 import { adminMeetings } from '../controllers/adminmeetingControllers.js';
@@ -18,15 +18,15 @@ router.post('/staff', validate(staffValidationSchema),trycatch(staffsadd));
 //  edit staffs details
 router.patch('/:staffid',trycatch(updatestaff));
 
-// show mentor and advisor
-router.get('/mentor',trycatch(viewMentor));
+// show Advisor and advisor
+router.get('/advisor',trycatch(viewAdvisor));
 router.get('/reviewer',trycatch(viewReviewer));
 
 
 
-// delete  mentor and advisor
+// delete  Advisor and advisor
 
-router.delete('/advisor/:mentorid',trycatch(deleteMentor));
+router.delete('/advisor/:advisorid',trycatch(deleteAdvisor));
 // admin side search  box
 router.get('/search', trycatch(searchStaff));
 
