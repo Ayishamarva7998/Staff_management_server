@@ -7,6 +7,7 @@ import { adminSchema } from '../validation/adminValidation.js';
 import { deleteMentor, searchStaff, staffsadd, viewMentor, viewReviewer } from '../controllers/staffControllers.js';
 import staffValidationSchema from '../validation/staffValidation.js';
 import { payment } from '../controllers/paymentControllers.js';
+import { adminMeetings } from '../controllers/adminmeetingControllers.js';
 
 const router=express.Router();
 
@@ -26,5 +27,9 @@ router.delete('/advisor/:mentorid',trycatch(deleteMentor));
 router.get('/search', trycatch(searchStaff));
 
 //payment for reviewer
-router.post("/payment/:id",payment)
+router.post('/payment/:paymentid',trycatch(payment))
+
+
+// for the Group meetings  email
+router.post('/meetings',trycatch(adminMeetings))
 export default router;

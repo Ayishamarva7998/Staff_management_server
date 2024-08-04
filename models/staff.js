@@ -22,7 +22,7 @@ const StaffSchema = new mongoose.Schema({
   calendarId: {
     type: String,
   },
-  position: {
+  role: {
     type: String,
     required: true,
   },
@@ -70,7 +70,7 @@ const ReviewerSchema = new mongoose.Schema({
   stack: {
     type: String,
   },
-  reviewCount: {
+  count: {
     type: Number,
     default: 0,
   },

@@ -6,8 +6,9 @@ const staffValidationSchema = Joi.object({
   password: Joi.string().min(5).pattern(new RegExp('^[a-zA-Z0-9]{3,30}$')).required(),
   phone: Joi.string().pattern(/^\d{10}$/).required(), // Ensuring phone number is exactly 10 digits
   calendarId: Joi.string(),
-  position: Joi.string().required(),
+  role: Joi.string().required(),
   stack: Joi.string().optional(),
+  count: Joi.string().optional(),
   hire: Joi.string().optional(),
   batch: Joi.string().optional(),
   profileImg: Joi.string().optional(),

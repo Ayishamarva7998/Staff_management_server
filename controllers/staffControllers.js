@@ -11,11 +11,11 @@ const transporter = nodemailer.createTransport({
   }
 });
 export const staffsadd = async (req, res) => {
-    const { email, name, phone, position, stack, batch, password ,hire} = req.body;
+    const { email, name, phone, role, stack, batch, password ,hire,count} = req.body;
 
-    // Ensure position is valid
-    if (!position || !['reviewer', 'mentor'].includes(position)) {
-        return res.status(400).json({ message: "Invalid position. Must be 'advisor' or 'mentor'." });
+    // Ensure role is valid
+    if (!role || !['reviewer', 'mentor'].includes(role)) {
+        return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'mentor'." });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -30,22 +30,23 @@ export const staffsadd = async (req, res) => {
     let staff;
 
     // Create staff based on the position
-    if (position === 'reviewer') {
+    if (role === 'reviewer') {
         staff = new Reviewer({
             name,
             phone,
             email,
-            position,
+            role,
             password: hashedPassword,
             stack,
-            hire
+            hire,
+            count
         });
-    } else if (position === 'mentor') {
+    } else if (role === 'mentor') {
         staff = new Mentor({
             name,
             phone,
             email,
-            position,
+            role,
             password: hashedPassword,
             batch 
         });
@@ -59,7 +60,7 @@ export const staffsadd = async (req, res) => {
         from: 'mufeedmusthafanm@gmail.com',
         to: email,
         subject: 'Welcome to the team!',
-        text: `Hello ${name},\n\nWelcome to the team as our new ${position}. We're excited to have you on board!\n\nWe have created your profile with the following details:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\n\nPlease keep this information secure and change your password after logging in for the first time.\n\nBest regards,\nYour Company`
+        text: `Hello ${name},\n\nWelcome to the team as our new ${role}. We're excited to have you on board!\n\nWe have created your profile with the following details:\nName: ${name}\nEmail: ${email}\nPassword: ${password}\n\nPlease keep this information secure and change your password after logging in for the first time.\n\nBest regards,\nYour Company`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -136,11 +137,11 @@ export const searchStaff = async (req, res) => {
   
       const regex = new RegExp(term, 'i');
   
-      // Search in both name and position fields across all staff documents
+      // Search in both name and role fields across all staff documents
       const results = await Staff.find({
         $or: [
           { name: { $regex: regex } },
-          { position: { $regex: regex } }
+          { role: { $regex: regex } }
         ]
       }).exec();
   
