@@ -1,5 +1,6 @@
 import { Staff } from '../models/staff.js';
 import nodemailer from 'nodemailer';
+import Admin from "../models/Admin.js";
 
 export const adminMeetings = async (req, res) => {
   const { date, time, description } = req.body;
@@ -14,7 +15,8 @@ export const adminMeetings = async (req, res) => {
 
     const emails = staffMembers.map(staff => staff.email);
     console.log(emails)
-    // // Step 2: Set up Nodemailer
+    
+    // Step 2: Set up Nodemailer
     let transporter = nodemailer.createTransport({
       service: 'gmail', 
       auth: {
@@ -31,11 +33,21 @@ export const adminMeetings = async (req, res) => {
       text: `Meeting Details:\nDate: ${date}\nTime: ${time}\nDescription: ${description}`,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
         return res.status(500).send(error.toString());
       }
-      res.status(200).send('Emails sent: ' + info.response);
+
+      // Step 4: Update the admin notification
+      const notificationMessage = `Meeting scheduled on ${date} at ${time} with description: ${description}`;
+
+      try {
+        // Assuming there is only one admin, update their notification field
+        await Admin.updateOne({}, { notification: notificationMessage });
+        res.status(200).send('Emails sent and notification updated: ' + info.response);
+      } catch (notificationError) {
+        res.status(500).send('Emails sent but error updating notification: ' + notificationError.message);
+      }
     });
   } catch (error) {
     res.status(500).send('Error retrieving staff members: ' + error.message);

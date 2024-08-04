@@ -154,4 +154,41 @@ export const searchStaff = async (req, res) => {
   };
                
 
- 
+//  edit sttafs or  update
+export const updatestaff = async (req, res) => {
+  const { staffid } = req.params;
+  const { email, name, phone, role, stack, batch, password, hire, count } = req.body;
+
+  try {
+      // Find the staff member by ID
+      let staff = await Staff.findById(staffid);
+      if (!staff) {
+          return res.status(404).json({ message: "Staff member not found" });
+      }
+
+      // Update fields if they exist in the request body
+      if (email) staff.email = email;
+      if (name) staff.name = name;
+      if (phone) staff.phone = phone;
+      if (role) {
+          if (!['reviewer', 'mentor'].includes(role)) {
+              return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'mentor'." });
+          }
+          staff.role = role;
+      }
+      if (stack && role === 'reviewer') staff.stack = stack;
+      if (batch && role === 'mentor') staff.batch = batch;
+      if (password) {
+          const salt = await bcrypt.genSalt(10);
+          staff.password = await bcrypt.hash(password, salt);
+      }
+      if (hire && role === 'reviewer') staff.hire = hire;
+      if (count && role === 'reviewer') staff.count = count;
+
+      // Save the updated staff member
+      await staff.save();
+      return res.status(200).json({ message: "Staff member updated successfully" });
+  } catch (error) {
+      return res.status(500).json({ message: "Error updating staff member", error: error.message });
+  }
+};
