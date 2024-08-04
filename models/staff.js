@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+
+// Base schema with common fields
 const StaffSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -19,19 +21,10 @@ const StaffSchema = new mongoose.Schema({
   },
   calendarId: {
     type: String,
-
-  },role: {
-    type: String,
-    enum: [  'advisor', 'reviewer'],
-    default: 'advisor',
   },
-  position: {
+  role: {
     type: String,
     required: true,
-  },
-  stack: {
-    type: String,
- 
   },
   profileImg: {
     type: String,
@@ -39,7 +32,6 @@ const StaffSchema = new mongoose.Schema({
   programs: [{
     date: {
       type: Date,
- 
     },
     details: {
       type: String,
@@ -65,7 +57,39 @@ const StaffSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+ 
 });
 
+// Define the Advisor schema extending the base schema
+const AdvisorSchema = new mongoose.Schema({
+  batch:  { type: String  // Adjust this to the type you need for batches
+}
+});
+
+// Define the Advisor schema extending the base schema
+const ReviewerSchema = new mongoose.Schema({
+  stack: {
+    type: String,
+  },
+  count: {
+    type: Number,
+    default: 0,
+  },
+  hire: {
+    type: Number,
+    default: 0,
+  },
+  details: {
+    type: String,
+  },
+});
+
+// Create the base Staff model
 const Staff = mongoose.model('Staff', StaffSchema);
-export default  Staff
+
+// Create discriminators
+const Reviewer = Staff.discriminator('Reviewer', ReviewerSchema);
+const Advisor = Staff.discriminator('Advisor', AdvisorSchema);
+
+export { Staff, Reviewer, Advisor };
+
