@@ -13,7 +13,9 @@ export const login = async (req,res)=>{
     let worker;
     if(role === 'admin'){
         worker = await Admin.findOne({email});
-    }else if (role=== 'staff'){
+    }else if (role=== 'advisor'){
+        worker = await Staff.findOne({email});
+    }else if(role==='reviewer'){
         worker = await Staff.findOne({email});
     }
     if(!worker){
