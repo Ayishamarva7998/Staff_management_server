@@ -13,8 +13,13 @@ const transporter = nodemailer.createTransport({
 export const staffsadd = async (req, res) => {
     const { email, name, phone, role, stack, batch, password ,hire,count} = req.body;
 
+    console.log(email, name, phone, role, stack, batch, password ,hire,count,'ddd');
+    
+
     // Ensure role is valid
     if (!role || !['reviewer', 'advisor'].includes(role)) {
+      console.log(role);
+      
         return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'Advisor'." });
     }
 
@@ -192,3 +197,12 @@ export const updatestaff = async (req, res) => {
       return res.status(500).json({ message: "Error updating staff member", error: error.message });
   }
 };
+
+
+export const getstaffs = async(req,res)=>{
+  const allStaff = await Staff.find();
+  if (!allStaff.length) {
+     return res.status(404).json({ message: 'No staff found' });
+  }
+  res.json({ staffs: allStaff });
+}
