@@ -62,8 +62,8 @@ const StaffSchema = new mongoose.Schema({
 
 // Define the Advisor schema extending the base schema
 const AdvisorSchema = new mongoose.Schema({
-  batch:  { type: String  // Adjust this to the type you need for batches
-}
+  batch: [{ type: String  // Adjust this to the type you need for batches
+}]
 });
 
 // Define the Advisor schema extending the base schema
@@ -82,6 +82,7 @@ const ReviewerSchema = new mongoose.Schema({
   details: {
     type: String,
   },
+  paymentStatus: { type: String, default: 'UNPAID' },
 });
 
 // Create the base Staff model

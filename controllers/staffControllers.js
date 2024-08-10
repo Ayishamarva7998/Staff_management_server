@@ -87,7 +87,7 @@ export const staffsadd = async (req, res) => {
 // Show Advisor in admin side
 export const viewAdvisor = async (req, res) => {
   try {
-    const advisors = await Advisor.find();
+    const advisors = await Advisor.find({ is_deleted: false });
 
     if (advisors.length === 0) {
       return res.status(404).json({ message: 'No advisors found' });
@@ -102,7 +102,8 @@ export const viewAdvisor = async (req, res) => {
 // Show advisors in admin side
 export const viewReviewer = async (req, res) => {
   try {
-    const reviewer = await Reviewer.find();
+    const reviewer = await Staff.find({ is_deleted: false });
+ 
 
     if (reviewer.length === 0) {
       return res.status(404).json({ message: 'No reviewer found' });
@@ -115,15 +116,18 @@ export const viewReviewer = async (req, res) => {
 };
 
 // Delete Advisor in admin side
-export const deleteAdvisor = async (req, res) => {
-  const { advisorId } = req.params;
-
+export const deletestaff = async (req, res) => {
+  const { staffId } = req.params;
+//  console.log(staffId);
+  
   try {
-    const deletedAdvisor = await Advisor.findByIdAndDelete(advisorId);
-
-    if (!deletedAdvisor) {
+    const deletedStaff = await Staff.findById(staffId);
+ 
+    if (!deletedStaff) {
       return res.status(404).json({ message: "Advisor not found" });
     }
+    deletedStaff.is_deleted = true;
+    await deletedStaff.save()
 
     res.status(200).json({ message: "Advisor deleted successfully" });
   } catch (error) {
@@ -159,42 +163,68 @@ export const searchStaff = async (req, res) => {
   };
                
 
-//  edit sttafs or  update
+// Update or edit staff
 export const updatestaff = async (req, res) => {
   const { staffid } = req.params;
-  const { email, name, phone, role, stack, batch, password, hire, count } = req.body;
+  const { email, name, phone, role, stack, batch, hire, count, removeBatch } = req.body;
 
   try {
-      // Find the staff member by ID
-      let staff = await Staff.findById(staffid);
-      if (!staff) {
-          return res.status(404).json({ message: "Staff member not found" });
-      }
+    // Find the staff member by ID
+    let staff = await Staff.findById(staffid);
+    if (!staff) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
 
-      // Update fields if they exist in the request body
-      if (email) staff.email = email;
-      if (name) staff.name = name;
-      if (phone) staff.phone = phone;
-      if (role) {
-          if (!['reviewer', 'advisor'].includes(role)) {
-              return res.status(400).json({ message: "Invalid role. Must be 'advisor' or 'advisor'." });
+    // Update fields if they exist in the request body
+    if (email) staff.email = email;
+    if (name) staff.name = name;
+    if (phone) staff.phone = phone;
+    if (role) {
+      if (!['reviewer', 'advisor'].includes(role.toLowerCase())) {
+        return res.status(400).json({ message: "Invalid role. Must be 'reviewer' or 'advisor'." });
+      }
+      staff.role = role.toLowerCase();
+    }
+    if (stack && staff.role === 'reviewer') staff.stack = stack;
+
+    // Handle batch addition or removal if the role is 'advisor'
+    if (staff.role === 'advisor') {
+      if (batch) {
+        // Ensure the batch field is an array
+        if (!Array.isArray(staff.batch)) {
+          staff.batch = []; // Initialize as an empty array if it's not already an array
+        }
+
+        // Add new batches to the existing batch array
+        if (Array.isArray(batch)) {
+          // Use Set to avoid duplicate entries
+          staff.batch = [...new Set([...staff.batch, ...batch])];
+        } else if (typeof batch === 'string') {
+          if (!staff.batch.includes(batch)) {
+            staff.batch.push(batch); // Add single batch to the array if it's not already included
           }
-          staff.role = role;
+        }
       }
-      if (stack && role === 'reviewer') staff.stack = stack;
-      if (batch && role === 'advisor') staff.batch = batch;
-      if (password) {
-          const salt = await bcrypt.genSalt(10);
-          staff.password = await bcrypt.hash(password, salt);
-      }
-      if (hire && role === 'reviewer') staff.hire = hire;
-      if (count && role === 'reviewer') staff.count = count;
 
-      // Save the updated staff member
-      await staff.save();
-      return res.status(200).json({ message: "Staff member updated successfully" });
+      // Remove batches from the array if `removeBatch` is provided
+      if (removeBatch) {
+        if (Array.isArray(removeBatch)) {
+          // Ensure removeBatch is an array
+          staff.batch = staff.batch.filter(b => !removeBatch.includes(b));
+        } else if (typeof removeBatch === 'string') {
+          staff.batch = staff.batch.filter(b => b !== removeBatch);
+        }
+      }
+    }
+
+    if (hire && staff.role === 'reviewer') staff.hire = hire;
+    if (count && staff.role === 'reviewer') staff.count = count;
+
+    // Save the updated staff member
+    await staff.save();
+    return res.status(200).json({ message: "Staff member updated successfully" });
   } catch (error) {
-      return res.status(500).json({ message: "Error updating staff member", error: error.message });
+    return res.status(500).json({ message: "Error updating staff member", error: error.message });
   }
 };
 
