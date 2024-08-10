@@ -102,7 +102,7 @@ export const viewAdvisor = async (req, res) => {
 // Show advisors in admin side
 export const viewReviewer = async (req, res) => {
   try {
-    const reviewer = await Staff.find({ is_deleted: false });
+    const reviewer = await Reviewer.find({ is_deleted: false });
  
 
     if (reviewer.length === 0) {

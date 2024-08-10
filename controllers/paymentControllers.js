@@ -47,7 +47,7 @@ export const payment = async (req, res) => {
             return res.status(404).json({ error: 'Reviewer not found' });
         }
 
-        const amount = 500 * user.count; // Amount calculation as per requirement
+        const amount = user.hire * user.count; // Amount calculation as per requirement
 
         // Define billDetails here
         const billDetails = {
