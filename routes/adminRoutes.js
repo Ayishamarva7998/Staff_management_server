@@ -30,7 +30,7 @@ router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
 
 // delete  Advisor 
 
-router.delete('/advisor/:staffId',authenticateToken,trycatch(deletestaff));
+router.delete('/advisor/:staffId',authenticateToken,(deletestaff));
 
 
 
