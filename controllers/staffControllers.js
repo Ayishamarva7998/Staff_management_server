@@ -104,7 +104,7 @@ export const viewReviewer = async (req, res) => {
   try {
     const reviewer = await Reviewer.find();
 
-    if (reviewer.length === 0) {
+    if (!reviewer) {
       return res.status(404).json({ message: 'No reviewer found' });
     }
 

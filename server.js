@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import adminRoutes from './routes/adminRoutes.js';
 import loginRoutes from './routes/loginRoutes.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
+import staffRoutes from './routes/staffroute.js'
 import cors from 'cors';
 
 config();
@@ -22,6 +23,7 @@ app.use(cors());
 
 app.use('/api',loginRoutes);
 app.use('/api/admin',adminRoutes);
+app.use('/api/staff',staffRoutes);
 
 app.use(errorHandler);
 

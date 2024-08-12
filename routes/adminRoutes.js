@@ -28,7 +28,6 @@ router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
 
 
 // delete  Advisor and advisor
-
 router.delete('/advisor/:advisorid',authenticateToken,trycatch(deleteAdvisor));
 // admin side search  box
 router.get('/search',authenticateToken, trycatch(searchStaff));
