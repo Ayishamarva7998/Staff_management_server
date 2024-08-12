@@ -4,9 +4,9 @@ import { trycatch } from '../middleware/trycatch.js';
 import { createAdmin,updatePassword } from '../controllers/adminControllers.js';
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/adminValidation.js';
-import { deleteAdvisor, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staffControllers.js';
+import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staffControllers.js';
 import staffValidationSchema from '../validation/staffValidation.js';
-import { payment } from '../controllers/paymentControllers.js';
+import { payment, verifyPayment } from '../controllers/paymentControllers.js';
 import { adminMeetings } from '../controllers/adminMeetingControllers.js';
 import { authenticateToken } from '../middleware/auth.js';
 import meetingSchema from '../validation/meeting_validation.js';
@@ -19,7 +19,8 @@ router.put('/:adminid',authenticateToken,trycatch(updatePassword));
 //   add staffs in admin page
 router.post('/staff',trycatch(staffsadd));
 //  edit staffs details
-router.patch('/:staffid',authenticateToken,trycatch(updatestaff));
+router.patch('/update/:staffid',trycatch(updatestaff));
+
 
 // show Advisor and advisor
 router.get('/advisor',authenticateToken,trycatch(viewAdvisor));
@@ -27,14 +28,19 @@ router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
 
 
 
-// delete  Advisor and advisor
+// delete  Advisor 
 
-router.delete('/advisor/:advisorid',authenticateToken,trycatch(deleteAdvisor));
+router.delete('/advisor/:staffId',authenticateToken,(deletestaff));
+
+
+
+
 // admin side search  box
 router.get('/search',authenticateToken, trycatch(searchStaff));
 
 //payment for reviewer
-router.post('/payment/:paymentid',authenticateToken,trycatch(payment))
+router.post('/payment/:paymentid',trycatch(payment))
+router.post('/verifypayment',trycatch(verifyPayment))
 
 
 // for the Group meetings  email

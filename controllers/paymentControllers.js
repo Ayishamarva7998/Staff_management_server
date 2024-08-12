@@ -1,151 +1,171 @@
-import { Staff } from '../models/staff.js';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
 import path from 'path';
+import { Staff } from '../models/staff.js';
+import dotenv from 'dotenv';
+dotenv.config();
+import { fileURLToPath } from 'url';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import mongoose from 'mongoose';
 
-// Helper function to generate PDF
-function generateBill(billDetails) {
-    const dir = './bills';
-    const filePath = path.join(dir, `${billDetails.notes.userid}.pdf`);
+// Create Razorpay instance
+const razorpay = new Razorpay({
+    key_id: process.env.Razorpay_key_id,
+    key_secret: process.env.Razorpay_key_secret,
+});
 
-    // Check if directory exists, if not create it
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-    }
+// Set up nodemailer transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // Use your email service provider
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+});
 
-    const doc = new PDFDocument({ margin: 50 });
-    doc.pipe(fs.createWriteStream(filePath));
-
-    // Company Info
-    doc.fontSize(20).fillColor('#004d99').text('BRIDGEOF', { align: 'center' });
-    doc.fontSize(12).fillColor('#333333').text('demo@gmail.com', { align: 'center' });
-    doc.text('999949494939', { align: 'center' });
-    doc.moveDown();
-
-    // Bill Title
-    doc.fontSize(25).fillColor('#004d99').text('Bill', { align: 'center' });
-    doc.moveDown();
-
-    // Draw Table Headers with Colors
-    const startX = 50;
-    const startY = 180;
-    const headerHeight = 30;
-    const rowHeight = 40; // Increased row height for more space
-    const tableWidth = 600; // Increased table width
-
-    // Header Background
-    doc.rect(startX, startY, tableWidth, headerHeight).fill('#004d99');
-    
-    // Header Text
-    doc.fontSize(14).fillColor('#ffffff')
-        .text('Name', startX + 10, startY + 10)
-        .text('Role', startX + 110, startY + 10)
-        .text('Calculation', startX + 210, startY + 10)
-        .text('Amount', startX + 360, startY + 10)
-        .text('Currency', startX + 460, startY + 10)
-        .text('Receipt', startX + 560, startY + 10);
-
-    // Draw Table Borders
-    doc.lineWidth(1).strokeColor('#004d99');
-    doc.rect(startX, startY, tableWidth, headerHeight).stroke();
-
-    // Draw Table Rows
-    doc.fontSize(12).fillColor('#000000');
-
-    // Calculation Breakdown
-    doc.text(`Reviews: ${billDetails.notes.reviews} * 500`, startX + 210, startY + headerHeight + 15);
-
-    // Table Row
-    doc.text(billDetails.name, startX + 10, startY + headerHeight + 15)
-       .text(billDetails.role, startX + 110, startY + headerHeight + 15)
-       .text('', startX + 210, startY + headerHeight + 15) // Empty space for Calculation
-       .text(billDetails.amount, startX + 360, startY + headerHeight + 15)
-       .text(billDetails.currency, startX + 460, startY + headerHeight + 15)
-       .text(billDetails.receipt, startX + 560, startY + headerHeight + 15);
-
-    // Draw Bottom Border
-    doc.rect(startX, startY + headerHeight + rowHeight, tableWidth, rowHeight).stroke();
-
-    // Add Line Separators for Columns
-    doc.moveTo(startX + 100, startY).lineTo(startX + 100, startY + headerHeight + rowHeight).stroke();
-    doc.moveTo(startX + 200, startY).lineTo(startX + 200, startY + headerHeight + rowHeight).stroke();
-    doc.moveTo(startX + 350, startY).lineTo(startX + 350, startY + headerHeight + rowHeight).stroke();
-    doc.moveTo(startX + 450, startY).lineTo(startX + 450, startY + headerHeight + rowHeight).stroke();
-    doc.moveTo(startX + 550, startY).lineTo(startX + 550, startY + headerHeight + rowHeight).stroke();
-
-    doc.end();
-
-    return filePath;
-}
-
-// Helper function to send email with the bill
-async function sendEmailWithBill(userEmail, filePath) {
-    let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'mufeedmusthafanm@gmail.com',
-            pass: 'qxkv bkbs kgip pxok',
-        },
-    });
-
-    let mailOptions = {
-        from: 'mufeedmusthafanm@gmail.com',
-        to: userEmail,
-        subject: 'Your Bill',
-        text: 'Please find attached your bill for the recent transaction.',
-        attachments: [
-            {
-                filename: 'bill.pdf',
-                path: filePath,
-            },
-        ],
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log('Email sent successfully');
-    } catch (error) {
-        console.error('Error sending email:', error);
-    }
-}
+// Get the current directory of the module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const payment = async (req, res) => {
-    const { paymentid } = req.params;
-    const user = await Staff.findById(paymentid);
+    try {
+        let { paymentid } = req.params;
 
-    if (!user) {
-        return res.status(400).send('Reviewer not found');
-    }
+        // Trim the paymentid to remove any extraneous whitespace or newline characters
+        paymentid = paymentid.trim();
 
-    const amount = 500 * user.count; // Amount calculation as per requirement
-    const billDetails = {
-        name: user.name,
-        role: user.role,
-        amount: amount, // amount in the smallest currency unit
-        currency: 'INR',
-        receipt: `receipt_order_${Math.random().toString(36).substring(2, 15)}`,
-        notes: {
-            reviews: user.count,
-            userid: paymentid,
-        },
-    };
-
-    console.log(billDetails);
-
-    // Generate PDF
-    const filePath = generateBill(billDetails);
-
-    // Send email with the bill
-    await sendEmailWithBill(user.email, filePath);
-
-    // Send the PDF for download
-    res.download(filePath, 'bill.pdf', (err) => {
-        if (err) {
-            console.error('Error sending the PDF:', err);
-            res.status(500).send('Error generating bill');
-        } else {
-            console.log('Bill sent for download');
+        // Validate if paymentid is a valid ObjectId
+        if (!mongoose.Types.ObjectId.isValid(paymentid)) {
+            return res.status(400).json({ error: 'Invalid payment ID' });
         }
-    });
+
+        const user = await Staff.findById(paymentid);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Reviewer not found' });
+        }
+
+        const amount = user.hire * user.count; // Amount calculation as per requirement
+
+        // Define billDetails here
+        const billDetails = {
+            amount: amount*100, // amount in the smallest currency unit
+            currency: 'INR',
+            receipt: `receipt_order_${Math.random().toString(36).substring(2, 15)}`,
+            notes: {
+                reviews: user.count,
+                userid: paymentid,
+            },
+        };
+
+        // Create order with Razorpay
+        const order = await razorpay.orders.create(billDetails);
+
+        // Send response with order details
+        res.status(200).json({
+            id: order.id,
+            amount: order.amount,
+            currency: order.currency,
+        });
+
+    } catch (error) {
+        console.error(error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Server error' });
+        }
+    }
+};
+export const verifyPayment = async (req, res) => {
+    try {
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+        // Generate the signature for comparison
+        const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest('hex');
+
+        const order = await razorpay.orders.fetch(razorpay_order_id);
+
+        // Verify the signature
+        if (generatedSignature === razorpay_signature) {
+            // Payment is verified
+            // Update the staff record
+            const staff = await Staff.findById(order.notes.userid);
+            staff.paymentStatus = 'PAID';
+
+            await staff.save();
+
+            // Generate PDF bill
+            const doc = new PDFDocument();
+            const pdfPath = path.join(__dirname, `bill_${staff._id}.pdf`);
+            
+            doc.pipe(fs.createWriteStream(pdfPath));
+
+            // Add company name and styling
+            doc.fontSize(30).fillColor('navy').text('Bridgeon', { align: 'center' });
+            doc.moveDown();
+
+            // Add bill title with some spacing
+            doc.fontSize(24).fillColor('black').text('Payment Bill', { align: 'center' });
+            doc.moveDown();
+            doc.moveDown();
+
+            // Draw table headers with padding and bold font
+            doc.fontSize(12).font('Helvetica-Bold');
+            doc.fillColor('gray').rect(50, 200, 500, 20).fill();
+            doc.fillColor('white').text('Description', 55, 205);
+            doc.text('Details', 355, 205);
+
+            // Draw table rows with more padding
+            const tableYStart = 220;
+            const rowHeight = 30;
+            const rowData = [
+                { description: 'Name:', details: `${staff.name }` },
+                { description: 'Payment Amount:', details: `${staff.count *500}` },
+                { description: 'Date:', details: new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) },
+                { description: 'Reviews Count:', details: staff.count },
+                { description: 'Account', details: 'Bridgeon Admin' },
+            ];
+
+            rowData.forEach((row, index) => {
+                const rowY = tableYStart + (index * rowHeight);
+                doc.fillColor(index % 2 === 0 ? 'lightgray' : 'white').rect(50, rowY, 500, rowHeight).fill();
+                doc.fillColor('black').font('Helvetica').text(row.description, 55, rowY + 10);
+                doc.text(row.details, 355, rowY + 10);
+            });
+
+            doc.end();
+
+            // Send email with PDF attachment
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: staff.email, // Ensure staff has an email field
+                subject: 'Your Payment Bill from Bridgeon Pvt',
+                text: 'Please find attached the bill for your recent payment.',
+                attachments: [
+                    {
+                        filename: `bill_${staff._id}.pdf`,
+                        path: pdfPath,
+                    },
+                ],
+            };
+
+            await transporter.sendMail(mailOptions);
+
+            // Clean up the PDF file after sending the email
+            fs.unlink(pdfPath, (err) => {
+                if (err) console.error('Error deleting the file', err);
+            });
+
+            // Respond to client
+            res.status(200).json({ message: 'Payment verified successfully and email sent' });
+        } else {
+            res.status(400).json({ error: 'Payment verification failed' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
 };
