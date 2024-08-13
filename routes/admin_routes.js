@@ -1,23 +1,24 @@
 "use strict";
 import express from 'express';
 import { trycatch } from '../middleware/trycatch.js';
-import { createAdmin,updatePassword } from '../controllers/adminControllers.js';
+import { createAdmin,updatePassword } from '../controllers/admin_controller.js';
 import validate from '../middleware/validate.js';
-import { adminSchema } from '../validation/adminValidation.js';
-import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staffControllers.js';
-import staffValidationSchema from '../validation/staffValidation.js';
-import { payment, verifyPayment } from '../controllers/paymentControllers.js';
-import { adminMeetings } from '../controllers/adminMeetingControllers.js';
+import { adminSchema } from '../validation/admin_validation.js';
+import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staff_controller.js';
+import { payment, verifyPayment } from '../controllers/payment_controller.js';
+import { adminMeetings } from '../controllers/admin_meeting-Controller.js';
 import { authenticateToken } from '../middleware/auth.js';
 import meetingSchema from '../validation/meeting_validation.js';
+import { staffValidationSchema } from '../validation/staff_validation.js';
 
 
 const router=express.Router();
 
 router.post('/adds',validate(adminSchema),trycatch(createAdmin));
 router.put('/:adminid',authenticateToken,trycatch(updatePassword));
+
 //   add staffs in admin page
-router.post('/staff',trycatch(staffsadd));
+router.post('/staff',authenticateToken,validate(staffValidationSchema),trycatch(staffsadd));
 //  edit staffs details
 router.patch('/update/:staffid',trycatch(updatestaff));
 
@@ -28,7 +29,7 @@ router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
 
 
 
-// delete  Advisor 
+// delete staffs 
 
 router.delete('/advisor/:staffId',authenticateToken,(deletestaff));
 

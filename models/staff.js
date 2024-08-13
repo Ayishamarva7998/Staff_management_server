@@ -19,26 +19,11 @@ const StaffSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  calendarId: {
-    type: String,
-  },
   role: {
     type: String,
     required: true,
   },
   profileImg: {
-    type: String,
-  },
-  programs: [{
-    date: {
-      type: Date,
-    },
-    details: {
-      type: String,
-
-    },
-  }],
-  notification: {
     type: String,
   },
   created_at: {
@@ -62,8 +47,7 @@ const StaffSchema = new mongoose.Schema({
 
 // Define the Advisor schema extending the base schema
 const AdvisorSchema = new mongoose.Schema({
-  batch: [{ type: String  // Adjust this to the type you need for batches
-}]
+  batch: [{ type: String }]
 });
 
 // Define the Advisor schema extending the base schema

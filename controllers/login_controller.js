@@ -1,11 +1,10 @@
 "use strict";
 
-
 import bcrypt from 'bcrypt';
 import { generateToken } from "../utils/generateToken.js";
 
 import Admin from '../models/Admin.js';
-import { Staff } from '../models/staff.js';
+import { Advisor, Reviewer } from '../models/staff.js';
 
 export const login = async (req,res)=>{
     const {email,password,role}=req.body;
@@ -13,8 +12,10 @@ export const login = async (req,res)=>{
     let worker;
     if(role === 'admin'){
         worker = await Admin.findOne({email});
-    }else if (role=== 'staff'){
-        worker = await Staff.findOne({email});
+    }else if (role=== 'advisor'){
+        worker = await Advisor.findOne({email});
+    }else if(role === 'reviewer'){
+        worker = await Reviewer.findOne({email});
     }
     if(!worker){
       return  res.status(401).json({message:'Invalid email or password'});

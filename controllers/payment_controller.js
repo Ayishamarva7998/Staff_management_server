@@ -1,3 +1,4 @@
+"use strict";
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
