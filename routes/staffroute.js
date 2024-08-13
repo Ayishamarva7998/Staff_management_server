@@ -1,7 +1,8 @@
+"use strict";
 import express from 'express';
 import { trycatch } from '../middleware/trycatch.js';
-import { booking, getbookings } from '../controllers/bookingcontroller.js';
-import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, updatetimeslot } from '../controllers/timeslotContrller.js';
+import { booking, getbookings } from '../controllers/booking_controller.js';
+import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, updatetimeslot } from '../controllers/timeslot_contrller.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();

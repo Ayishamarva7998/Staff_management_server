@@ -2,9 +2,9 @@
 import express from 'express';
 import { config } from 'dotenv';
 import connectDB from './config/db.js';
-import adminRoutes from './routes/adminRoutes.js';
-import loginRoutes from './routes/loginRoutes.js';
-import { errorHandler } from './middleware/errorMiddleware.js';
+import adminRoutes from './routes/admin_routes.js';
+import loginRoutes from './routes/login_routes.js';
+import { errorHandler } from './middleware/error_middleware.js';
 import staffRoutes from './routes/staffroute.js'
 import cors from 'cors';
 
@@ -12,11 +12,7 @@ config();
 
 const app=express();
 
-app.use(cors({
-    origin: 'http://localhost:5173', // Replace with your frontend URL
-    methods: 'GET,POST,PUT,DELETE',  // Allowed methods
-    allowedHeaders: 'Content-Type,Authorization' // Allowed headers
-  }));
+
 
 app.use(express.json());
 app.use(cors());

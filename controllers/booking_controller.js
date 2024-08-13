@@ -1,3 +1,4 @@
+"use strict";
 import mongoose from "mongoose";
 import Booking from "../models/booking.js";
 import { Advisor, Reviewer } from "../models/staff.js";
@@ -78,7 +79,6 @@ export const booking = async (req,res)=>{
     if(!bookings){
       return res.status(200).json([]);
     }
-    console.log(bookings);
     
     res.status(200).json(bookings);
 }
