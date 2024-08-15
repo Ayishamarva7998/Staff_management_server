@@ -11,5 +11,4 @@ const meetingSchema = Joi.object({
     location: Joi.string().optional().allow('') // Optional field for meeting location
   });
 
-
   export default meetingSchema;

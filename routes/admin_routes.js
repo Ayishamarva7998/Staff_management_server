@@ -9,7 +9,7 @@ import { payment, verifyPayment } from '../controllers/payment_controller.js';
 import { adminMeetings } from '../controllers/admin_meeting-Controller.js';
 import { authenticateToken } from '../middleware/auth.js';
 import meetingSchema from '../validation/meeting_validation.js';
-import { staffValidationSchema } from '../validation/staff_validation.js';
+import { staffValidationSchema, updateStaffSchema } from '../validation/staff_validation.js';
 
 
 const router=express.Router();
@@ -20,7 +20,7 @@ router.put('/:adminid',authenticateToken,trycatch(updatePassword));
 //   add staffs in admin page
 router.post('/staff',authenticateToken,validate(staffValidationSchema),trycatch(staffsadd));
 //  edit staffs details
-router.patch('/update/:staffid',trycatch(updatestaff));
+router.patch('/update/:staffid',authenticateToken,validate(updateStaffSchema),trycatch(updatestaff));
 
 
 // show Advisor and advisor

@@ -4,6 +4,8 @@ import { trycatch } from '../middleware/trycatch.js';
 import { booking, getbookings } from '../controllers/booking_controller.js';
 import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, updatetimeslot } from '../controllers/timeslot_contrller.js';
 import { authenticateToken } from '../middleware/auth.js';
+import validate from '../middleware/validate.js';
+import { createTimeslotSchema, updateTimeslotSchema } from '../validation/timeslot_validation.js';
 
 const router = express.Router();
 
@@ -11,8 +13,8 @@ const router = express.Router();
 
 router.get('/timeslots',authenticateToken,trycatch(gettimeslot));
 router.get('/reviewer/:id/timeslots',authenticateToken, trycatch(getreviewertimeslots));
-router.post('/createtimeslot',authenticateToken, trycatch(createtimeslot));
-router.put('/updatetimeslot/:id',authenticateToken, trycatch(updatetimeslot));
+router.post('/createtimeslot',authenticateToken,validate(createTimeslotSchema), trycatch(createtimeslot));
+router.put('/updatetimeslot/:id',authenticateToken,validate(updateTimeslotSchema), trycatch(updatetimeslot));
 router.delete('/deletetimeslot/:id',authenticateToken, trycatch(deletetimeslot));
 
 // Advisor Booking Routes

@@ -1,5 +1,6 @@
 import joi from 'joi';
 
+
 const adminSchema=joi.object({
     username:joi.string().required(),
     email:joi.string().email().required(),
