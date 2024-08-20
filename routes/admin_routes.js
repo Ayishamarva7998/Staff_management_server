@@ -31,7 +31,7 @@ router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
 
 // delete staffs 
 
-router.delete('/advisor/:staffId',authenticateToken,(deletestaff));
+router.delete('/delete/:staffId',authenticateToken,(deletestaff));
 
 
 

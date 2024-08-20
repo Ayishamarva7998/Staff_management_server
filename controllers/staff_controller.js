@@ -9,11 +9,11 @@ dotenv.config();
 
 export const staffsadd = async (req, res) => {
   const value = req.body;
+  
   if (!value) {
     return res.status(404).json({ message: "Values not found" });
   }
 
-  // Ensure role is valid
   if (
     !value.role ||
     !["reviewer", "advisor"].includes(value.role.toLowerCase())
@@ -46,7 +46,7 @@ export const staffsadd = async (req, res) => {
       email: value.email,
       role: value.role,
       password: hashedPassword,
-      stack: value.stack,
+      stack: value.stacks,
       hire: value.hire,
       count: value.count,
     });
@@ -57,7 +57,7 @@ export const staffsadd = async (req, res) => {
       email: value.email,
       role: value.role,
       password: hashedPassword,
-      batch: value.batch,
+      batch: value.batches,
     });
   }
 
@@ -136,7 +136,6 @@ export const searchStaff = async (req, res) => {
   res.status(200).json(results);
 };
 
-// Update or edit staff
 export const updatestaff = async (req, res) => {
   const { staffid } = req.params;
   const updateData = req.body;
@@ -144,23 +143,22 @@ export const updatestaff = async (req, res) => {
   let staff = await Staff.findById(staffid);
   if (!staff) {
     return res.status(404).json({ message: "Staff member not found" });
-  }
+  } 
 
-  if (staff.role === "reviewer") {
+  if (staff.__t === "Reviewer") {
     staff = await Reviewer.findByIdAndUpdate(staffid, updateData, {
       new: true,
     });
-  } else if (staff.role === "advisor") {
+  } else if (staff.__t === "Advisor") {
     staff = await Advisor.findByIdAndUpdate(staffid, updateData, { new: true });
   } else {
-    staff = await Staff.findByIdAndUpdate(staffid, updateData, { new: true });
+    return res.status(400).json({ message: "Staff role not recognized" });
   }
-  const changes = Object.entries(updateData).map(([key, value]) => `${key}: ${value}`).join('\n');
-  console.log(changes);
-  
 
-
-  
+  if (!staff) {
+    return res.status(404).json({ message: "Failed to update staff member" });
+  }
+   
   res.status(200).json({ message: "Staff updated successfully" });
 };
 

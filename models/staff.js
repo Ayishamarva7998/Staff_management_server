@@ -52,9 +52,7 @@ const AdvisorSchema = new mongoose.Schema({
 
 // Define the Advisor schema extending the base schema
 const ReviewerSchema = new mongoose.Schema({
-  stack: {
-    type: String,
-  },
+  stack:[{ type: String }],
   count: {
     type: Number,
     default: 0,
@@ -66,7 +64,7 @@ const ReviewerSchema = new mongoose.Schema({
   details: {
     type: String,
   },
-  paymentStatus: { type: String, default: 'UNPAID' },
+  paymentStatus: { type: Boolean, default: 'false' },
 });
 
 // Create the base Staff model
