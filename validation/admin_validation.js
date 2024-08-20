@@ -1,8 +1,26 @@
-import joi from 'joi';
+import Joi from 'joi';
 
-const adminSchema=joi.object({
-    username:joi.string().required(),
-    email:joi.string().email().required(),
-    password:joi.string().min(6).required()
+const adminSchema = Joi.object({
+  username: Joi.string()
+    .min(3)
+    .max(30)
+    .required(),
+  
+  email: Joi.string()
+    .email()
+    .required(),
+  
+  password: Joi.string()
+    .min(6)
+    .required(),
+  
+  batches: Joi.array()
+    .items(Joi.string().min(1))
+    .default([]),  
+   
+    stacks: Joi.array()
+    .items(Joi.string().min(1))
+    .default([]),
 });
-export {adminSchema};
+
+export { adminSchema };

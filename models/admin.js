@@ -17,6 +17,12 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    batches: [{
+      type: String,
+    }],
+    stacks: [{
+      type: String,
+    }],
     is_active: {
       type: Boolean,
       default: true,
@@ -24,9 +30,6 @@ const adminSchema = new mongoose.Schema(
     is_deleted: {
       type: Boolean,
       default: false,
-    },
-    notification: {
-      type: String,
     },
   },
   { timestamps: true }
