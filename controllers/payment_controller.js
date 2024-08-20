@@ -79,9 +79,9 @@ export const payment = async (req, res) => {
     }
 };
 export const verifyPayment = async (req, res) => {
+
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
-
         // Generate the signature for comparison
         const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -94,8 +94,8 @@ export const verifyPayment = async (req, res) => {
             // Payment is verified
             // Update the staff record
             const staff = await Staff.findById(order.notes.userid);
-            staff.paymentStatus = 'PAID';
-
+            staff.paymentStatus = true;
+staff.count=0;
             await staff.save();
 
             // Generate PDF bill
