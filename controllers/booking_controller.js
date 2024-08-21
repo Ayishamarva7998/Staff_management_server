@@ -169,3 +169,29 @@ export const reviewcount = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const totalreviews = async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+    // Find bookings associated with the reviewer
+    const totalreviews = await Booking.find({ reviewer: id, is_deleted: true, reviewer_accepted: true ,advisor_accepted : true}).populate({
+      path: 'timeslot',
+      select: ' date time description '
+    }).populate({
+      path: 'advisor', // Assuming your Booking schema has an advisor field
+      select: 'name ' // Adjust the fields as needed
+  });
+  ;
+
+    if (!totalreviews || totalreviews.length === 0) {
+      return res.status(200).json({ message: 'No bookings found for the reviewer' });
+    }
+
+    res.status(200).json(totalreviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

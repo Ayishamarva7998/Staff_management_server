@@ -95,7 +95,7 @@ export const verifyPayment = async (req, res) => {
             // Update the staff record
             const staff = await Staff.findById(order.notes.userid);
             staff.paymentStatus = true;
-staff.count=0;
+             staff.count=0;
             await staff.save();
 
             // Generate PDF bill
