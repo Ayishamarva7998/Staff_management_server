@@ -1,7 +1,7 @@
 "use strict";
 import express from 'express';
 import { trycatch } from '../middleware/trycatch.js';
-import { add_batche, add_stack, createAdmin,delete_batch,delete_stack,updatePassword } from '../controllers/admin_controller.js';
+import { add_batche, add_stack, createAdmin,delete_batch,delete_stack } from '../controllers/admin_controller.js';
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/admin_validation.js';
 import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staff_controller.js';
@@ -15,7 +15,6 @@ import { staffValidationSchema, updateStaffSchema } from '../validation/staff_va
 const router=express.Router();
 
 router.post('/adds',validate(adminSchema),trycatch(createAdmin));
-router.put('/:adminid',authenticateToken,trycatch(updatePassword));
 
 //   add staffs in admin page
 router.post('/staff',authenticateToken,validate(staffValidationSchema),trycatch(staffsadd));

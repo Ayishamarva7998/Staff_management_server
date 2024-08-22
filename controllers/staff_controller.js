@@ -163,9 +163,14 @@ export const updatestaff = async (req, res) => {
 };
 
 export const getstaffs = async (req, res) => {
-  const allStaff = await Staff.find();
-  if (!allStaff.length) {
-    return res.status(404).json({ message: "No staff found" });
-  }
-  res.json({ staffs: allStaff });
+  const all_staff = await Staff.find() ;
+
+    if (all_staff.length > 0) {
+      return res.status(200).json({ staffs: all_staff });
+    }
+    if (all_staff.length === 0) {
+      return res.status(200).json({ staffs: [] });
+    }
+
+    res.status(404).json({ message: "No staff found", staffs: [] });
 };
