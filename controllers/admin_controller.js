@@ -23,26 +23,6 @@ export const createAdmin = async (req, res) => {
     .json({ message: "Admin created successfully", data: admin });
 };
 
-export const updatePassword = async (req, res) => {
-  const { adminid } = req.params;
-  const { newPassword } = req.body;
-
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-  const updatedAdmin = await Admin.findByIdAndUpdate(
-    adminid,
-    { password: hashedPassword },
-    { new: true, runValidators: true } // Ensure we get the updated document and run validation
-  );
-  if (!updatedAdmin) {
-    return res.status(404).json({ message: "User not found" });
-  }
-  return res
-    .status(200)
-    .json({ message: "Password update successfully", data: updatedAdmin });
-};
-
 
 export const add_batche = async (req, res) => {
   const { adminid } = req.params;
