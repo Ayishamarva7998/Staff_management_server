@@ -6,6 +6,7 @@ import adminRoutes from './routes/admin_routes.js';
 import loginRoutes from './routes/login_routes.js';
 import { errorHandler } from './middleware/error_middleware.js';
 import staffRoutes from './routes/staffroute.js'
+import commonRoutes from './routes/common_routes.js'
 import cors from 'cors';
 
 config();
@@ -20,7 +21,7 @@ app.use(cors());
 app.use('/api',loginRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/staff',staffRoutes);
-
+app.use('/api/common',commonRoutes);
 app.use(errorHandler);
 
 connectDB();
