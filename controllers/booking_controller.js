@@ -82,3 +82,116 @@ export const booking = async (req,res)=>{
     
     res.status(200).json(bookings);
 }
+
+
+export const acceptBooking = async (req, res) => {
+  const { id } = req.params; // Assuming id is the booking ID
+
+  // Check if the booking ID is valid
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid booking ID' });
+  }
+
+  // Find the specific booking by its ID
+  const booking = await Booking.findOne({ _id: id, is_deleted: false });
+
+  if (!booking) {
+    return res.status(404).json({ message: 'Booking not found' });
+  }
+
+  // Update the reviewer_accepted field to true
+  booking.reviewer_accepted = true;    
+  booking.is_deleted= true;    
+
+  await booking.save();
+
+  res.status(200).json(booking);
+};
+
+export const allBookings = async (req, res) => {
+
+  const booking = await Booking.find().populate({
+    path: 'timeslot',
+    select: ' date time description '
+  }).populate({
+    path: 'reviewer', // Assuming your Booking schema has an advisor field
+    select: 'name email paymentStatus' // Adjust the fields as needed
+});
+
+  if (!booking) {
+    return res.status(404).json({ message: 'Booking not found' });
+  }
+  res.status(200).json(booking);
+};
+
+export const reviewcount = async (req, res) => {
+  const { id } = req.params;
+  // console.log(id, "review count");
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Invalid reviewer ID' });
+  }
+
+  try {
+    // Find bookings associated with the reviewer
+    const bookings = await Booking.find({ _id: id, is_deleted: true, reviewer_accepted: true });
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(200).json({ message: 'No bookings found for the reviewer' });
+    }
+
+    // Extract the reviewer ID from the first booking
+    const reviewerId = bookings[0].reviewer;
+  // console.log(reviewerId,"reviwidddd");
+
+    // Iterate over each booking and set advisor_accepted to true
+    for (let booking of bookings) {
+      booking.advisor_accepted = true;
+      await booking.save(); // Save each booking document individually
+    }
+
+    // console.log(bookings, "dummy");
+
+    // Find the reviewer and update the count
+    const reviewer = await Reviewer.findById(reviewerId);
+    if (!reviewer) {
+      return res.status(404).json({ message: 'Reviewer not found' });
+    }
+
+    reviewer.count += 1;
+
+    // Save the updated reviewer document
+    await reviewer.save();
+
+    res.status(200).json({ message: 'Review count updated successfully', reviewer });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const totalreviews = async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+    // Find bookings associated with the reviewer
+    const totalreviews = await Booking.find({ reviewer: id, is_deleted: true, reviewer_accepted: true ,advisor_accepted : true}).populate({
+      path: 'timeslot',
+      select: ' date time description '
+    }).populate({
+      path: 'advisor', // Assuming your Booking schema has an advisor field
+      select: 'name ' // Adjust the fields as needed
+  });
+  ;
+
+    if (!totalreviews || totalreviews.length === 0) {
+      return res.status(200).json({ message: 'No bookings found for the reviewer' });
+    }
+
+    res.status(200).json(totalreviews);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
