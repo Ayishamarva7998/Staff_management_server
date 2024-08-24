@@ -5,7 +5,7 @@ import { add_batche, add_stack, createAdmin,delete_batch,delete_stack } from '..
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/admin_validation.js';
 import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staff_controller.js';
-import { payment, verifyPayment } from '../controllers/payment_controller.js';
+import { payment, paymenthistory, verifyPayment } from '../controllers/payment_controller.js';
 import { adminMeetings } from '../controllers/admin_meeting-Controller.js';
 import { authenticateToken } from '../middleware/auth.js';
 import meetingSchema from '../validation/meeting_validation.js';
@@ -56,4 +56,7 @@ router.post('/batch/:adminid',authenticateToken,trycatch(add_batche));
 router.delete('/batch/:adminid',authenticateToken,trycatch(delete_batch));
 
 
+// get payment history
+
+router.get('/paymenhistory/:id',trycatch(paymenthistory));
 export default router;

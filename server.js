@@ -8,7 +8,7 @@ import { errorHandler } from './middleware/error_middleware.js';
 import staffRoutes from './routes/staffroute.js'
 import commonRoutes from './routes/common_routes.js'
 import cors from 'cors';
-
+import './controllers/cronjob_contoller.js'
 config();
 
 const app=express();
