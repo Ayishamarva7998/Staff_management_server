@@ -4,16 +4,18 @@ import fs from 'fs';
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { Staff } from '../models/staff.js';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 import { fileURLToPath } from 'url';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
-import mongoose from 'mongoose';
+import Paymenthistory from '../models/payment.js';
+
 
 // Create Razorpay instance
 const razorpay = new Razorpay({
-    key_id: process.env.Razorpay_key_id,
+    key_id: process.env.Razorpay_key_Id,
     key_secret: process.env.Razorpay_key_secret,
 });
 
@@ -95,8 +97,14 @@ export const verifyPayment = async (req, res) => {
             // Update the staff record
             const staff = await Staff.findById(order.notes.userid);
             staff.paymentStatus = true;
-             staff.count=0;
+           
             await staff.save();
+            const paymentHistory = new Paymenthistory({
+                reviewerId: order.notes.userid,
+                amount: order.amount / 100, // Assuming amount is in paise, convert to rupees
+                paymentStatus: true,
+              });
+              await paymentHistory.save();
 
             // Generate PDF bill
             const doc = new PDFDocument();
@@ -165,6 +173,23 @@ export const verifyPayment = async (req, res) => {
         } else {
             res.status(400).json({ error: 'Payment verification failed' });
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+export const paymenthistory = async (req, res) => {
+    try {
+        const {id}=req.params;
+        const userss = await Paymenthistory.find({reviewerId:id})
+        
+        if (!userss || userss.length === 0) {
+            return res.status(404).json({ error: 'No payment history found' });
+        }
+        
+        console.log(userss); // Log the retrieved data
+        res.status(200).json(userss);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error' });
