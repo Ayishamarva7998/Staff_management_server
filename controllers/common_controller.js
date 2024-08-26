@@ -55,3 +55,15 @@ export const updatePassword = async (req, res) => {
 
     return res.status(200).json({ message: "Password updated successfully" });
   };
+
+  export const getStacks = async (req,res)=>{
+    const admins = await Admin.find(); 
+      const stacks = admins.flatMap(admin => admin.stacks); 
+      res.json(stacks); 
+  }
+  
+  export const getBatchs = async (req,res)=>{
+    const admins = await Admin.find(); 
+    const batches = admins.flatMap(admin => admin.batches); 
+    res.json(batches); 
+  }
