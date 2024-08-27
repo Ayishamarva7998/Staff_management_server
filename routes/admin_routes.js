@@ -57,6 +57,8 @@ router.delete('/batch/:adminid',authenticateToken,trycatch(delete_batch));
 
 
 // get payment history
-
 router.get('/paymenhistory/:id',trycatch(paymenthistory));
+// get notificattion in admin
+// router.get('/inbox',trycatch(adminInbox));
+
 export default router;

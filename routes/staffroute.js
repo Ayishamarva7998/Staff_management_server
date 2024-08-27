@@ -6,6 +6,7 @@ import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, upda
 import { authenticateToken } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
 import { createTimeslotSchema, updateTimeslotSchema } from '../validation/timeslot_validation.js';
+import { advisorInbox, readInbox } from '../controllers/staff_controller.js';
 
 const router = express.Router();
 
@@ -22,8 +23,12 @@ router.delete('/deletetimeslot/:id',authenticateToken, trycatch(deletetimeslot))
 router.post('/booking',authenticateToken,trycatch(booking));
 router.get('/reviewer/:id/bookings',authenticateToken,trycatch(getbookings));
 router.post(`/acceptBooking/:id`,authenticateToken,trycatch(acceptBooking));
+// inbox
+router.get('/inbox/:id',trycatch(advisorInbox));
+router.post('/inbox/view/:id',trycatch(readInbox));
+
 // Reviewer Booking Routes
-router.get('/allbooking',authenticateToken,trycatch(allBookings));
+router.get('/allbooking/:id',trycatch(allBookings));
 
 router.post('/reviewcount/:id',authenticateToken,trycatch(reviewcount));
 router.get('/totalreviews/:id',trycatch(totalreviews));

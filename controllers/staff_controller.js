@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Staff, Reviewer, Advisor } from "../models/staff.js";
 import { loginTemplate } from "../templates/login_invitation_templates.js";
 import transporter from "../config/mailer.js";
+import Notification from "../models/notification.js";
 
 dotenv.config();
 
@@ -173,4 +174,55 @@ export const getstaffs = async (req, res) => {
     }
 
     res.status(404).json({ message: "No staff found", staffs: [] });
+
+};
+
+
+export const advisorInbox = async (req, res) => {
+  try {
+    const {id}= req.params;
+    // Assuming you have only one admin document
+    
+  
+    
+    
+    const notifications = await Notification.find({recipient:id, is_deleted: false }).populate({
+      path: 'sender',
+      select: 'name '
+    })
+    // console.log(notifications);
+
+    res.status(200).json({ message: "Notifications retrieved successfully", notifications });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+
+export const readInbox = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Check if id is provided
+    if (!id) {
+      return res.status(400).json({ message: "Recipient ID is required" });
+    }
+
+    // Validate ObjectId format
+    // if (!mongoose.Types.ObjectId.isValid(id)) {
+    //   return res.status(400).json({ message: "Invalid Recipient ID" });
+    // }
+
+    // Mark notifications as read for the specified recipient
+    const notifications = await Notification.updateMany(
+      { recipient: id },
+      { status: "read" }
+    );
+
+    res.status(200).json({ message: "Notifications updated successfully", notifications });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 };

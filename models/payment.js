@@ -17,6 +17,10 @@ const paymentSchema = new mongoose.Schema(
       default: Date.now,
     },
     paymentStatus: { type: Boolean, default: 'false' },
+    is_deleted: {
+      type: Boolean,
+      default: false,
+    },
     // paymentStatus: {
     //   type: String,
     //   enum: ["Pending", "Completed"],

@@ -2,6 +2,7 @@
 import mongoose from "mongoose";
 import Admin from "../models/Admin.js";
 import bcrypt from "bcrypt";
+import Notification from "../models/notification.js";
 
 export const createAdmin = async (req, res) => {
   const value = req.body;
@@ -189,3 +190,24 @@ export const delete_batch = async (req, res) => {
 
   return res.status(200).json({ message: 'Batch deleted successfully!' });
 }
+// export const adminInbox = async (req, res) => {
+//   try {
+//     const admin = await Admin.findOne();  // Assuming you have only one admin document
+    
+//     if (!admin) {
+//       return res.status(404).json({ message: "Admin not found" });
+//     }
+    
+//     const adminId = admin._id;
+//     const notifications = await Notification.find({ recipient: adminId }).populate({
+//       path: 'timeslot',
+//       select: ' date time description '
+//     })
+//     console.log(notifications);
+
+//     res.status(200).json({ message: "Notifications retrieved successfully", notifications });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error: error.message });
+//   }
+// };

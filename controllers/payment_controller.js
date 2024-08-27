@@ -11,8 +11,8 @@ import { fileURLToPath } from 'url';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import Paymenthistory from '../models/payment.js';
-
-
+import Notification from '../models/notification.js';
+import Admin from '../models/Admin.js';
 // Create Razorpay instance
 const razorpay = new Razorpay({
     key_id: process.env.Razorpay_key_Id,
@@ -168,6 +168,18 @@ export const verifyPayment = async (req, res) => {
                 if (err) console.error('Error deleting the file', err);
             });
 
+            const admin = await Admin.findOne();  // Assuming you have only one admin document
+            const adminId = admin._id;
+            const notification = new Notification({
+                recipient: staff._id,  // The reviewer who is booked
+                sender: adminId,      // The advisor who made the booking
+                type: 'info',           // You can adjust the type as needed (e.g., 'info', 'success')
+                message: ` Your salary has been credited to your account.`,
+          
+                targetGroup: 'individual',
+              });
+              
+              await notification.save();
             // Respond to client
             res.status(200).json({ message: 'Payment verified successfully and email sent' });
         } else {
@@ -182,7 +194,7 @@ export const verifyPayment = async (req, res) => {
 export const paymenthistory = async (req, res) => {
     try {
         const {id}=req.params;
-        const userss = await Paymenthistory.find({reviewerId:id})
+        const userss = await Paymenthistory.find({reviewerId:id,is_deleted: false })
         
         if (!userss || userss.length === 0) {
             return res.status(404).json({ error: 'No payment history found' });
