@@ -28,8 +28,6 @@ export const updatePassword = async (req, res) => {
     const { Id } = req.params;
   
     const value = req.body;
-
-    console.log(Id,value);
     
     if (value.newPassword !== value.confirmPassword) {
       return res.status(400).json({ message: "New password and confirm password do not match" });

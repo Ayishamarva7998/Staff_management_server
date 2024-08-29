@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.Schema(
   {
     reviewerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Reviewer", // Assuming you have a Reviewer model
+      ref: "Reviewer", 
       required: true,
     },
     amount: {
