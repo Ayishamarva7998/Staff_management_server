@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import Paymenthistory from '../models/payment.js';
-
+import Booking from "../models/booking.js";
 
 // Create Razorpay instance
 const razorpay = new Razorpay({
@@ -33,7 +33,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const payment = async (req, res) => {
-    try {
+ 
         let { paymentid } = req.params;
 
         // Trim the paymentid to remove any extraneous whitespace or newline characters
@@ -73,16 +73,10 @@ export const payment = async (req, res) => {
             currency: order.currency,
         });
 
-    } catch (error) {
-        console.error(error);
-        if (!res.headersSent) {
-            res.status(500).json({ error: 'Server error' });
-        }
-    }
+   
 };
 export const verifyPayment = async (req, res) => {
 
-    try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
         // Generate the signature for comparison
         const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -173,25 +167,67 @@ export const verifyPayment = async (req, res) => {
         } else {
             res.status(400).json({ error: 'Payment verification failed' });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
-    }
+   
 };
 
-export const paymenthistory = async (req, res) => {
-    try {
+
+
+
+export const paymentHistory = async (req, res) => {
+   
         const {id}=req.params;
-        const userss = await Paymenthistory.find({reviewerId:id})
-        
-        if (!userss || userss.length === 0) {
-            return res.status(404).json({ error: 'No payment history found' });
+        const payment_history = await Paymenthistory.find({reviewerId:id})
+      
+        if(!payment_history){
+            return res.status(404).json({ message: 'No payment history found' });
         }
         
-        console.log(userss); // Log the retrieved data
-        res.status(200).json(userss);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Server error' });
-    }
+        if (payment_history.length === 0) {
+            return res.status(200).json([]);
+        }
+        res.status(200).json(payment_history);
 };
+
+
+export const total_review_detsils = async (req,res)=>{
+
+     const paymentcompletecount  = await Paymenthistory.countDocuments();
+     
+     const incompletecount = await Booking.countDocuments({
+        reviewer_accepted: false,        
+        advisor_accepted: false
+    });
+
+     const completecount = await Booking.countDocuments({
+        reviewer_accepted: true,        
+        advisor_accepted: true
+    });
+
+    const pendingcount = await Booking.countDocuments({
+        reviewer_accepted: true,
+        advisor_accepted: false
+    });
+
+    const totalcount = await Booking.countDocuments();
+
+    if (paymentcompletecount === 0) {
+        return res.status(200).json({
+            message: 'No payment history found.',
+            paymentcompletecount: 0,
+            incompletecount,
+            pendingcount,
+            totalcount,
+            completecount
+        });
+    }
+
+
+    return res.status(200).json({
+        paymentcompletecount,
+        incompletecount,
+        pendingcount,
+        totalcount,
+        completecount
+    });
+    
+}
