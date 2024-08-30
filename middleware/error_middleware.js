@@ -21,7 +21,7 @@ const errorHandler = (error, req, res, next) => {
 
   if (error.code === 11000) {
     const keyName = Object.keys(error.keyValue ?? {})[0];
-    return res.json({ message: `Given ${keyName} already exists.` });
+    return res.status(400).json({ message: `Given ${keyName} already exists.` });
   }
 
   console.log("Unhandled Error:", error);

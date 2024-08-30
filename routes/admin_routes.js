@@ -4,7 +4,7 @@ import { trycatch } from '../middleware/trycatch.js';
 import { add_batche, add_stack, createAdmin,delete_batch,delete_stack } from '../controllers/admin_controller.js';
 import validate from '../middleware/validate.js';
 import { adminSchema } from '../validation/admin_validation.js';
-import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewReviewer } from '../controllers/staff_controller.js';
+import {   deletestaff, getstaffs, searchStaff, staffsadd, updatestaff, viewAdvisor, viewEmployee, viewReviewer } from '../controllers/staff_controller.js';
 import { payment, paymentHistory, total_review_detsils, verifyPayment } from '../controllers/payment_controller.js';
 import { adminMeetings } from '../controllers/admin_meeting-Controller.js';
 import { authenticateToken } from '../middleware/auth.js';
@@ -25,6 +25,7 @@ router.patch('/update/:staffid',authenticateToken,validate(updateStaffSchema),tr
 // show Advisor and advisor
 router.get('/advisor',authenticateToken,trycatch(viewAdvisor));
 router.get('/reviewer',authenticateToken,trycatch(viewReviewer));
+router.get('/employee',authenticateToken,trycatch(viewEmployee));
 
 
 

@@ -1,7 +1,7 @@
 "use strict";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import { Staff, Reviewer, Advisor } from "../models/staff.js";
+import { Staff, Reviewer, Advisor, Employee } from "../models/staff.js";
 import { loginTemplate } from "../templates/login_invitation_templates.js";
 import transporter from "../config/mailer.js";
 
@@ -9,37 +9,38 @@ dotenv.config();
 
 export const staffsadd = async (req, res) => {
   const value = req.body;
-  
+
+
   if (!value) {
     return res.status(404).json({ message: "Values not found" });
   }
 
   if (
     !value.role ||
-    !["reviewer", "advisor"].includes(value.role.toLowerCase())
+    !["reviewer", "advisor", "employee"].includes(value.role.toLowerCase())
   ) {
     return res
       .status(400)
-      .json({ message: "Invalid role. Must be 'advisor' or 'reviewer'." });
+      .json({ message: "Invalid role. Must be 'advisor', 'reviewer', or 'employee'." });
   }
 
-  // Hash the password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(value.password, salt);
-
-  // Check if the email or phone already exists
-  const existingStaff = await Staff.findOne({
-    $or: [{ email: value.email }, { phone: value.phone }],
-  });
-  if (existingStaff) {
-    return res
-      .status(400)
-      .json({ message: "Email or phone number already exists!" });
-  }
-
-  // Create staff based on the position
   let staff;
+
   if (value.role === "reviewer") {
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(value.password, salt);
+
+    // Check if the email or phone already exists
+    const existingStaff = await Staff.findOne({
+      $or: [{ email: value.email }, { phone: value.phone }],
+    });
+    if (existingStaff) {
+      return res
+        .status(400)
+        .json({ message: "Email or phone number already exists!" });
+    }
+
     staff = new Reviewer({
       name: value.name,
       phone: value.phone,
@@ -50,7 +51,35 @@ export const staffsadd = async (req, res) => {
       hire: value.hire,
       count: value.count,
     });
+
+    // Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: value.email,
+      subject: "Welcome to the team!",
+      html: loginTemplate(value.name, value.role, value.email, value.password),
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).json({ message: "Error sending email", error });
+      }
+    });
   } else if (value.role === "advisor") {
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(value.password, salt);
+
+    // Check if the email or phone already exists
+    const existingStaff = await Staff.findOne({
+      $or: [{ email: value.email }, { phone: value.phone }],
+    });
+    if (existingStaff) {
+      return res
+        .status(400)
+        .json({ message: "Email or phone number already exists!" });
+    }
+
     staff = new Advisor({
       name: value.name,
       phone: value.phone,
@@ -59,28 +88,34 @@ export const staffsadd = async (req, res) => {
       password: hashedPassword,
       batch: value.batches,
     });
+
+    // Send the email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: value.email,
+      subject: "Welcome to the team!",
+      html: loginTemplate(value.name, value.role, value.email, value.password),
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        return res.status(500).json({ message: "Error sending email", error });
+      }
+    });
+  } else if (value.role === "employee") {
+    staff = new Employee({
+       name: value.name,
+       email: value.email,
+      position: value.position,
+      role: value.role,
+      phone: value.phone,
+    });
   }
 
   // Save the staff
   await staff.save();
 
-  // Send the email
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: value.email,
-    subject: "Welcome to the team!",
-    html: loginTemplate(value.name, value.role, value.email, value.password),
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      // console.error('Error sending email:', error);
-      return res.status(500).json({ message: "Error sending email", error });
-    } else {
-      // console.log('Email sent:', info.response);
-      return res.status(200).json({ message: "Staff created successfully" });
-    }
-  });
+  return res.status(200).json({ message: "Staff created successfully" });
 };
 
 // Show Advisor in admin side
@@ -101,6 +136,13 @@ export const viewReviewer = async (req, res) => {
     return res.status(404).json({ message: "No reviewer found" });
   }
   res.status(200).json(reviewer);
+};
+export const viewEmployee = async (req, res) => {
+  const employee = await Employee.find({ is_deleted: false });
+  if (!employee) {
+    return res.status(404).json({ message: "No employee found" });
+  }
+  res.status(200).json(employee);
 };
 
 // Delete Advisor in admin side
@@ -143,14 +185,14 @@ export const updatestaff = async (req, res) => {
   let staff = await Staff.findById(staffid);
   if (!staff) {
     return res.status(404).json({ message: "Staff member not found" });
-  } 
+  }
 
   if (staff.__t === "Reviewer") {
-    staff = await Reviewer.findByIdAndUpdate(staffid, updateData, {
-      new: true,
-    });
+    staff = await Reviewer.findByIdAndUpdate(staffid, updateData, { new: true });
   } else if (staff.__t === "Advisor") {
     staff = await Advisor.findByIdAndUpdate(staffid, updateData, { new: true });
+  } else if (staff.__t === "Employee") {
+    staff = await Employee.findByIdAndUpdate(staffid, updateData, { new: true });
   } else {
     return res.status(400).json({ message: "Staff role not recognized" });
   }
@@ -158,9 +200,10 @@ export const updatestaff = async (req, res) => {
   if (!staff) {
     return res.status(404).json({ message: "Failed to update staff member" });
   }
-   
+
   res.status(200).json({ message: "Staff updated successfully" });
 };
+
 
 export const getstaffs = async (req, res) => {
   const all_staff = await Staff.find() ;

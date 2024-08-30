@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 
-// Base schema with common fields
 const StaffSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -10,10 +9,14 @@ const StaffSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true, 
+    trim: true,
   },
   password: {
     type: String,
-    required: true,
+    required: function () {
+      return this.__t !== 'Employee';
+    },
   },
   phone: {
     type: Number,
@@ -22,9 +25,7 @@ const StaffSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-  },
-  profileImg: {
-    type: String,
+    enum: ['advisor', 'reviewer', 'employee'],
   },
   created_at: {
     type: Date,
@@ -42,17 +43,22 @@ const StaffSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
- 
 });
 
-// Define the Advisor schema extending the base schema
+// Advisor schema
 const AdvisorSchema = new mongoose.Schema({
-  batch: [{ type: String }]
+  batch: {
+    type: [String],
+    default: [], 
+  },
 });
 
-// Define the Advisor schema extending the base schema
+// Reviewer schema
 const ReviewerSchema = new mongoose.Schema({
-  stack:[{ type: String }],
+  stack: {
+    type: [String],
+    default: [],
+  },
   count: {
     type: Number,
     default: 0,
@@ -61,10 +67,18 @@ const ReviewerSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  details: {
-    type: String,
+  paymentStatus: {
+    type: Boolean,
+    default: false,
   },
-  paymentStatus: { type: Boolean, default: 'false' },
+});
+
+// Employee schema
+const EmployeeSchema = new mongoose.Schema({
+  position: {
+    type: String,
+    required: true,
+  },
 });
 
 // Create the base Staff model
@@ -73,6 +87,6 @@ const Staff = mongoose.model('Staff', StaffSchema);
 // Create discriminators
 const Reviewer = Staff.discriminator('Reviewer', ReviewerSchema);
 const Advisor = Staff.discriminator('Advisor', AdvisorSchema);
+const Employee = Staff.discriminator('Employee', EmployeeSchema);
 
-export { Staff, Reviewer, Advisor };
-
+export { Staff, Reviewer, Advisor, Employee };
