@@ -190,6 +190,7 @@ export const delete_batch = async (req, res) => {
 
   return res.status(200).json({ message: 'Batch deleted successfully!' });
 }
+
 // export const adminInbox = async (req, res) => {
 //   try {
 //     const admin = await Admin.findOne();  // Assuming you have only one admin document
@@ -211,3 +212,5 @@ export const delete_batch = async (req, res) => {
 //     res.status(500).json({ message: "Server error", error: error.message });
 //   }
 // };
+
+

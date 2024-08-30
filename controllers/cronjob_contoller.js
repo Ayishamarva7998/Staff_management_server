@@ -4,7 +4,7 @@ import Booking from '../models/booking.js';
 import Timeslot from '../models/timeslot.js';
 import Notification from '../models/notification.js';
 import Admin from '../models/Admin.js';
-cron.schedule('*/10 * * * *', async () => {
+cron.schedule('*/5 * * * *', async () => {
     try {
         // Find all staff members with paymentStatus as true
         const staffMembers = await Staff.find({ paymentStatus: true });
@@ -51,13 +51,13 @@ console.log("notification send to admin");
 });
 
 
-cron.schedule('*/15 * * * *', async () => {
+cron.schedule('*/4 * * * *', async () => {
     try {
-        await Notification.updateMany({}, { is_deleted: true });
-        console.log("Notifications marked as deleted");
+        // Update all notifications with status "read" to set `is_deleted` to true
+        await Notification.updateMany({ status: "read" }, { is_deleted: true });
+
+        // console.log("Notifications marked as deleted");
     } catch (error) {
         console.error("Error updating notifications:", error);
     }
-
-
 });

@@ -5,7 +5,7 @@ const paymentSchema = new mongoose.Schema(
   {
     reviewerId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Reviewer", // Assuming you have a Reviewer model
+      ref: "Reviewer", 
       required: true,
     },
     amount: {
@@ -21,11 +21,9 @@ const paymentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    // paymentStatus: {
-    //   type: String,
-    //   enum: ["Pending", "Completed"],
-    //   default: "Pending",
-    // },
+
+    paymentID: { type :String, required: true,}
+
   },
   { timestamps: true }
 );
