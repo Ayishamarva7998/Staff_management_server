@@ -6,6 +6,8 @@ import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, upda
 import { authenticateToken } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
 import { createTimeslotSchema, updateTimeslotSchema } from '../validation/timeslot_validation.js';
+import { addstudent, getstudents, remove_student, update_student } from '../controllers/students_controllers.js';
+import { studentValidationSchema, updateStudentValidationSchema } from '../validation/student_validation.js';
 
 const router = express.Router();
 
@@ -27,4 +29,15 @@ router.get('/allbooking',authenticateToken,trycatch(allBookings));
 
 router.post('/reviewcount/:id',authenticateToken,trycatch(reviewcount));
 router.get('/totalreviews/:id',trycatch(totalreviews));
+
+
+
+// students routes 
+
+router.post('/student/:advisorId',authenticateToken,validate(studentValidationSchema),trycatch(addstudent));
+router.get('/student/:advisorId',getstudents);
+router.put('/student/:advisorId/:studentId',authenticateToken,validate(updateStudentValidationSchema),trycatch(update_student));
+router.delete('/student/:advisorId/:studentId',authenticateToken,trycatch(remove_student))
+
+
 export default router;
