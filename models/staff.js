@@ -45,19 +45,29 @@ const StaffSchema = new mongoose.Schema({
   },
 });
 
+
+
+
 // Advisor schema
 const AdvisorSchema = new mongoose.Schema({
   batch: {
     type: [String],
     default: [], 
   },
+  students: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Student',
+  }]
 });
+
+
+
 
 // Reviewer schema
 const ReviewerSchema = new mongoose.Schema({
-  stack: {
+  batch: {
     type: [String],
-    default: [],
+    default: [], 
   },
   count: {
     type: Number,
@@ -88,5 +98,8 @@ const Staff = mongoose.model('Staff', StaffSchema);
 const Reviewer = Staff.discriminator('Reviewer', ReviewerSchema);
 const Advisor = Staff.discriminator('Advisor', AdvisorSchema);
 const Employee = Staff.discriminator('Employee', EmployeeSchema);
+
+
+
 
 export { Staff, Reviewer, Advisor, Employee };
