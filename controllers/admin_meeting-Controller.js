@@ -1,8 +1,8 @@
 "use strict";
 import { Staff } from '../models/staff.js';
 import nodemailer from 'nodemailer';
-import Admin from "../models/Admin.js";
 import { meetingInvitationTemplate } from '../templates/meeting_invitation_template.js';
+import { Admin } from '../models/admin.js';
 
 export const adminMeetings = async (req, res) => {
   const { title, date, time, participants, meetingtype, description } = req.body;

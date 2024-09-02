@@ -1,7 +1,7 @@
 "use strict";
 import mongoose from "mongoose";
-import Admin from "../models/Admin.js";
 import bcrypt from "bcrypt";
+import { Admin } from "../models/admin.js";
 
 export const createAdmin = async (req, res) => {
   const value = req.body;
