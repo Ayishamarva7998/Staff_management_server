@@ -14,8 +14,8 @@ import Paymenthistory from '../models/payment.js';
 import Booking from "../models/booking.js";
 
 // Create Razorpay instance
-const razorpay = new Razorpay({
-    key_id: process.env.Razorpay_key_Id,
+const instance = new Razorpay({
+    key_id: process.env.Razorpay_key_id,
     key_secret: process.env.Razorpay_key_secret,
 });
 
@@ -64,7 +64,7 @@ export const payment = async (req, res) => {
         };
 
         // Create order with Razorpay
-        const order = await razorpay.orders.create(billDetails);
+        const order = await instance.orders.create(billDetails);
 
         // Send response with order details
         res.status(200).json({
@@ -83,7 +83,7 @@ export const verifyPayment = async (req, res) => {
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest('hex');
 
-        const order = await razorpay.orders.fetch(razorpay_order_id);
+        const order = await instance.orders.fetch(razorpay_order_id);
 
         // Verify the signature
         if (generatedSignature === razorpay_signature) {

@@ -25,7 +25,7 @@ app.use('/api/common',commonRoutes);
 app.use(errorHandler);
 
 connectDB();
-const port = process.env.PORT || 4500;
+const port = process.env.PORT || 3000;
 
 app.listen(port,()=>{
     console.log(`Server is running on http://localhost:${port}`);    
