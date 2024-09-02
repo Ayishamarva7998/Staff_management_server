@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import Admin from "../models/Admin.js";
 import Booking from "../models/booking.js";
 import { Staff } from "../models/staff.js";
 import bcrypt from "bcrypt";
+import { Admin } from "../models/admin.js";
 
 
 export const getdatafromid = async (req,res)=>{
