@@ -15,9 +15,9 @@ const timeslotSchema = new mongoose.Schema({
       default: true,
   },
   reviewer: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Staff',
-      required: true,
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Reviewer", 
+    required: true 
   },
   created_at: {
       type: Date,

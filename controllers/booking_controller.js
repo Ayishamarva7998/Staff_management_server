@@ -3,57 +3,115 @@ import mongoose from "mongoose";
 import Booking from "../models/booking.js";
 import { Advisor, Reviewer } from "../models/staff.js";
 import Timeslot from "../models/timeslot.js";
+import { Student } from "../models/student.js";
 
-export const booking = async (req,res)=>{
-  const { advisorId, timeslotId, reviewerId, email, batch, stack, week, comments } = req.body;
+export const create_booking = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!advisorId || !timeslotId || !reviewerId || !email || !batch || !stack || !week) {
-    return res.status(400).json({ message: 'Missing required fields!' });
-  }
-    const timeslot = await Timeslot.findById(timeslotId).populate({
-    path: 'reviewer',
-    select: 'email stack _id'
-  })
-  .exec();     
-    
-    if (!timeslot) {
-      return res.status(404).json({ message: 'Timeslot not found!' });
+  try {
+    const { advisorId, timeslotId, studentId } = req.params;
+
+    // Validate IDs
+    if (!advisorId || !mongoose.Types.ObjectId.isValid(advisorId) ||
+        !timeslotId || !mongoose.Types.ObjectId.isValid(timeslotId) ||
+        !studentId || !mongoose.Types.ObjectId.isValid(studentId)) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Invalid IDs' });
+    }
+
+    // Fetch entities
+    const [advisor, student, timeslot] = await Promise.all([
+      Advisor.findById(advisorId).session(session),
+      Student.findById(studentId).session(session),
+      Timeslot.findById(timeslotId).session(session)
+    ]);
+
+    // Check if all entities are found
+    if (!advisor || !student || !timeslot) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: 'Advisor, Student, or Timeslot not found' });
+    }
+
+    const studentAssociated = advisor.students.find(student => student._id.toString() === studentId);
+    if (!studentAssociated) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'This student is not this advisor\'s student' });
     }
 
     if (!timeslot.available) {
-        return res.status(400).json({ message: 'Timeslot is not available!' });
-      }
-
-      const reviewer = await Reviewer.findById(reviewerId);
-      if (!reviewer) {
-        return res.status(404).json({ message: 'Reviewer not found!' });
-      }
-
-      const advisor = await Advisor.findById(advisorId);
-    if (!advisor) {
-      return res.status(404).json({ message: 'Advisor not found!' });
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Timeslot is not available' });
     }
 
-    const booking = new Booking({
+    // Check if the timeslot is already booked
+    const existingBooking = await Booking.findOne({ timeslot: timeslotId, is_booked: true }).session(session);
+    if (existingBooking) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Timeslot is already booked' });
+    }
+
+    // Extract the reviewer from the timeslot
+    const reviewerId = timeslot.reviewer;
+    if (!reviewerId) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Timeslot does not have an associated reviewer' });
+    }
+
+    // Fetch the reviewer
+    const reviewer = await Reviewer.findById(reviewerId).session(session);
+    if (!reviewer || !reviewer.is_active) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: 'Reviewer is not available' });
+    }
+
+    // Create a new booking
+    const newBooking = new Booking({
       timeslot: timeslotId,
-      reviewer: reviewerId,
       advisor: advisorId,
-      email,
-      batch,
-      stack,
-      week,
-      comments,
-      is_booked: true, 
+      student: studentId,
+      reviewer: reviewerId,
+      is_booked: true,
+      reviewer_accepted: false,
+      advisor_accepted: false,
+      is_active: true,
+      is_deleted: false
     });
 
-      // Save the booking
-      await booking.save();
-  
-      timeslot.available = false;
-      await timeslot.save();
-  
-      return res.status(201).json({ message: 'Booking successfully', booking });
+    // Save the booking
+    await newBooking.save({ session });
+
+    // Update the timeslot to mark it as unavailable
+    await Timeslot.findByIdAndUpdate(timeslotId, { available: false }, { session });
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(201).json({ message: 'Booking successfully' });
+
+  } catch (error) {
+
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    session.endSession();
+    console.error('Error creating booking:', error);
+    return res.status(500).json({ message: 'Server Error' });
   }
+};
+
+
+
+
+
 
 
 
