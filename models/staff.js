@@ -65,7 +65,7 @@ const AdvisorSchema = new mongoose.Schema({
 
 // Reviewer schema
 const ReviewerSchema = new mongoose.Schema({
-  batch: {
+  stack: {
     type: [String],
     default: [], 
   },

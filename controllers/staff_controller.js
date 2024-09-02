@@ -182,6 +182,9 @@ export const updatestaff = async (req, res) => {
   const { staffid } = req.params;
   const updateData = req.body;
 
+
+  console.log(updateData)
+
   let staff = await Staff.findById(staffid);
   if (!staff) {
     return res.status(404).json({ message: "Staff member not found" });

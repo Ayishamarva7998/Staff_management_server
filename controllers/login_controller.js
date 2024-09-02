@@ -4,7 +4,8 @@ import bcrypt from 'bcrypt';
 import { generateToken } from "../utils/generateToken.js";
 
 import Admin from '../models/Admin.js';
-import { Advisor, Reviewer, Staff } from '../models/staff.js';
+import { Advisor, Reviewer } from '../models/staff.js';
+
 
 export const login = async (req,res)=>{
     const {email,password,role}=req.body;

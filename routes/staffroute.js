@@ -1,7 +1,7 @@
 "use strict";
 import express from 'express';
 import { trycatch } from '../middleware/trycatch.js';
-import { acceptBooking, allBookings, booking, getbookings, reviewcount, totalreviews } from '../controllers/booking_controller.js';
+import { acceptBooking, allBookings, create_booking, getbookings, reviewcount, totalreviews } from '../controllers/booking_controller.js';
 import { createtimeslot, deletetimeslot, getreviewertimeslots, gettimeslot, updatetimeslot } from '../controllers/timeslot_contrller.js';
 import { authenticateToken } from '../middleware/auth.js';
 import validate from '../middleware/validate.js';
@@ -21,7 +21,7 @@ router.delete('/deletetimeslot/:id',authenticateToken, trycatch(deletetimeslot))
 
 // Advisor Booking Routes
 
-router.post('/booking',authenticateToken,trycatch(booking));
+router.post('/booking/:advisorId/:studentId/:timeslotId',create_booking);
 router.get('/reviewer/:id/bookings',authenticateToken,trycatch(getbookings));
 router.post(`/acceptBooking/:id`,authenticateToken,trycatch(acceptBooking));
 // Reviewer Booking Routes
